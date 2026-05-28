@@ -10,7 +10,8 @@ create table users(
                       commends BIGINT default 0,
     /* how many messages had user left */
                       messages BIGINT default 0,
-                      created_at TIMESTAMPTZ not null default current_timestamp
+                      created_at TIMESTAMPTZ not null default current_timestamp,
+                      updated_at TIMESTAMPTZ not null default current_timestamp
 );
 /* table, that represents nodes.*/
 create table nodes(

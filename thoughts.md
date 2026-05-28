@@ -1,10 +1,10 @@
 My first question was: how to manage the database.
 this is the option I see right now
 
-        node (Main topic)
-         /\
+         node (Main topic)
+          /\
     branch branch (for example more specific topic related to main one/question etc)
-       |     | 
+       /\     /\
     leaves  leaves (comments/reactions/opinions on branches)
 
 tables:
