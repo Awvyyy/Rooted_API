@@ -1,0 +1,162 @@
+package entity;
+
+
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, updatable = false)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 33)
+    private String username;
+
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "token_hash", nullable = false, unique = true)
+    private String tokenHash;
+
+    @Column(name = "contains_profile_picture", nullable = false, insertable = false)
+    private boolean containsProfilePicture;
+
+    @Column(name = "profile_picture_url")
+    private String profilePictureUrl;
+
+    @Column(name = "country_code", nullable = false, length = 3)
+    private String countryCode;
+
+    @Column(nullable = false, insertable = false)
+    private Integer commends;
+
+    @Column(nullable = false, insertable = false)
+    private Integer messages;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant  createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    /* constructors */
+
+    public User(String username, String passwordHash, String email, String tokenHash, boolean containsProfilePicture, String profilePictureUrl, String countryCode, Integer commends, Integer messages) {
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.email = email;
+        this.tokenHash = tokenHash;
+        this.containsProfilePicture = containsProfilePicture;
+        this.profilePictureUrl = profilePictureUrl;
+        this.countryCode = countryCode;
+        this.commends = commends;
+        this.messages = messages;
+    }
+
+    protected User() {
+    }
+
+    /* getters */
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public String getTokenHash() {
+        return tokenHash;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public Integer getCommends() {
+        return commends;
+    }
+
+    public Integer getMessages() {
+        return messages;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public boolean getContainsProfilePicture() {
+        return containsProfilePicture;
+    }
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    /* setters */
+
+    public void rename(String username) {
+        this.username = username;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public void setTokenHash(String tokenHash) {
+        this.tokenHash = tokenHash;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public void setCommends(Integer commends) {
+        this.commends = commends;
+    }
+
+    public void setMessages(Integer messages) {
+        this.messages = messages;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public void changeEmail(String email) {
+        this.email = email;
+    }
+
+    public void setContainsProfilePicture(boolean containsProfilePicture){
+        this.containsProfilePicture = containsProfilePicture;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl){
+        this.profilePictureUrl = profilePictureUrl;
+    }
+}
