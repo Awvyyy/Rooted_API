@@ -1,4 +1,4 @@
-package entity;
+package com.example.demo.entity;
 
 
 import jakarta.persistence.*;
@@ -21,7 +21,7 @@ public class Branch {
     private Node node;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User user;
 
     @Column(nullable = false)

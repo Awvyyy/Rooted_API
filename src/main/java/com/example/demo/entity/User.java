@@ -1,4 +1,4 @@
-package entity;
+package com.example.demo.entity;
 
 
 import jakarta.persistence.*;
@@ -25,8 +25,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "token_hash", nullable = false, unique = true)
-    private String tokenHash;
+    @Column(name = "is_email_verified", nullable = false)
+    private boolean isEmailVerified;
 
     @Column(name = "contains_profile_picture", nullable = false, insertable = false)
     private boolean containsProfilePicture;
@@ -53,16 +53,12 @@ public class User {
 
     /* constructors */
 
-    public User(String username, String passwordHash, String email, String tokenHash, boolean containsProfilePicture, String profilePictureUrl, String countryCode, Integer commends, Integer messages) {
+    public User(String username, String passwordHash, String email, String countryCode) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.email = email;
-        this.tokenHash = tokenHash;
-        this.containsProfilePicture = containsProfilePicture;
-        this.profilePictureUrl = profilePictureUrl;
         this.countryCode = countryCode;
-        this.commends = commends;
-        this.messages = messages;
+        this.isEmailVerified = false;
     }
 
     protected User() {
@@ -80,10 +76,6 @@ public class User {
 
     public String getPasswordHash() {
         return passwordHash;
-    }
-
-    public String getTokenHash() {
-        return tokenHash;
     }
 
     public String getCountryCode() {
@@ -110,6 +102,14 @@ public class User {
         return email;
     }
 
+    public boolean isEmailVerified() {
+        return isEmailVerified;
+    }
+
+    public boolean isContainsProfilePicture() {
+        return containsProfilePicture;
+    }
+
     public boolean getContainsProfilePicture() {
         return containsProfilePicture;
     }
@@ -126,10 +126,6 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
-    }
-
-    public void setTokenHash(String tokenHash) {
-        this.tokenHash = tokenHash;
     }
 
     public void setCountryCode(String countryCode) {
@@ -154,6 +150,10 @@ public class User {
 
     public void setContainsProfilePicture(boolean containsProfilePicture){
         this.containsProfilePicture = containsProfilePicture;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        isEmailVerified = emailVerified;
     }
 
     public void setProfilePictureUrl(String profilePictureUrl){

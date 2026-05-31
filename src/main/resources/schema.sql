@@ -5,7 +5,7 @@ create table users(
                       username VARCHAR(33) not null unique,
                       password_hash VARCHAR(255) not null,
                       email VARCHAR(255) not null unique,
-                      token_hash VARCHAR(255) not null unique,
+                      is_email_verified boolean not null default false,
                       contains_profile_picture BOOLEAN not null default false,
                       profile_picture_url TEXT,
                       country_code VARCHAR(3) not null,

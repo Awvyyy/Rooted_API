@@ -1,4 +1,4 @@
-package repository;
+package com.example.demo.repository;
 
 public interface BranchRepository {
 }
