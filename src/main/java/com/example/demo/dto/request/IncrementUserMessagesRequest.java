@@ -1,8 +1,8 @@
 package com.example.demo.dto.request;
 
-public record ChangeProfilePictureRequest(
+public record IncrementUserMessagesRequest(
         String email,
         String password,
-        String profilePictureUrl
+        Integer messages
 ) implements AuthRequest{
 }

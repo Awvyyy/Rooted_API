@@ -1,8 +1,8 @@
 package com.example.demo.dto.request;
 
-public record ChangePasswordRequest(
+public record ChangeCountryRequest(
         String email,
         String password,
-        String newPassword
+        String newCountryCode
 ) implements AuthRequest {
 }

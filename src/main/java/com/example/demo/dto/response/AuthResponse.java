@@ -5,5 +5,6 @@ public record AuthResponse(
      String username,
      String email,
      boolean containsProfilePicture,
-     String profilePictureUrl
+     String profilePictureUrl,
+     String countryCode
 ){}

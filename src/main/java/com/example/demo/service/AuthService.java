@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.request.AuthRequest;
 import com.example.demo.dto.request.LoginRequest;
 import com.example.demo.dto.request.RegisterRequest;
 import com.example.demo.dto.response.AuthResponse;
@@ -16,10 +17,12 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserService userService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     @Transactional
@@ -41,13 +44,8 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthResponse userLogin (LoginRequest request){
-        User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                "Invalid email or password"));
-
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
-        }
+    public AuthResponse userLogin (AuthRequest request){
+        User user = userService.validateUser(request);
 
         return toResponse(user);
 
@@ -59,6 +57,7 @@ public class AuthService {
                 user.getUsername(),
                 user.getEmail(),
                 user.isContainsProfilePicture(),
-                user.getProfilePictureUrl());
+                user.getProfilePictureUrl(),
+                user.getCountryCode());
     }
 }

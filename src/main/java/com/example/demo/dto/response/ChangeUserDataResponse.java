@@ -5,7 +5,10 @@ public record ChangeUserDataResponse(
         String email,
         String CountryCode,
         boolean containsProfilePicture,
-        String profilePictureUrl
+        String profilePictureUrl,
+        String countryCode,
+        Integer commends,
+        Integer messages
 ) {
 
 }

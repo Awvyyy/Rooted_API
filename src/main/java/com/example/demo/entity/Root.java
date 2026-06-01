@@ -3,8 +3,8 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "nodes")
-public class Node {
+@Table(name = "roots")
+public class Root {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,13 +22,13 @@ public class Node {
 
     /* constructors */
 
-    public Node(String title, String description, Integer activityRating) {
+    public Root(String title, String description, Integer activityRating) {
         this.title = title;
         this.description = description;
         this.activityRating = activityRating;
     }
 
-    protected Node() {
+    protected Root() {
 
     }
 

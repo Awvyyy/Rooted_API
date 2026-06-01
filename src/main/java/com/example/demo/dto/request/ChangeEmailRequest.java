@@ -4,5 +4,5 @@ public record ChangeEmailRequest(
         String email,
         String newEmail,
         String password
-) {
+) implements AuthRequest {
 }

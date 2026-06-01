@@ -1,9 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.request.ChangeEmailRequest;
-import com.example.demo.dto.request.ChangePasswordRequest;
-import com.example.demo.dto.request.ChangeProfilePictureRequest;
-import com.example.demo.dto.request.ChangeUsernameRequest;
+import com.example.demo.dto.request.*;
 import com.example.demo.dto.response.ChangeUserDataResponse;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
@@ -26,12 +23,7 @@ public class UserService {
 
     @Transactional
     public ChangeUserDataResponse changeUserPassword (ChangePasswordRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
-
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong password");
-        }
+        User user = validateUser(request);
 
         if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't use old password");
@@ -46,12 +38,7 @@ public class UserService {
     @Transactional
     public ChangeUserDataResponse changeUsername(ChangeUsernameRequest request){
 
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
-
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong password");
-        }
+        User user = validateUser(request);
 
         if (userRepository.existsByUsername(request.newUsername())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already registered");
@@ -65,12 +52,7 @@ public class UserService {
     @Transactional
     public ChangeUserDataResponse changeEmail(ChangeEmailRequest request){
 
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
-
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong password");
-        }
+        User user = validateUser(request);
 
         if (userRepository.existsByEmail(request.newEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered");
@@ -84,12 +66,7 @@ public class UserService {
     @Transactional
     public ChangeUserDataResponse changeProfilePicture(ChangeProfilePictureRequest request){
 
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
-
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong password");
-        }
+        User user = validateUser(request);
 
         if (user.getProfilePictureUrl().equals(request.profilePictureUrl())){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Choose new profile picture");
@@ -101,13 +78,44 @@ public class UserService {
         return toResponse(user);
     }
 
+    @Transactional
+    public ChangeUserDataResponse changeCountry(ChangeCountryRequest request){
+
+        User user = validateUser(request);
+
+        if (user.getCountryCode().equals(request.newCountryCode())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Choose new country");
+        }
+
+        user.setCountryCode(request.newCountryCode());
+
+        return toResponse(user);
+    }
+
+//    @Transactional
+//    public ChangeUserDataResponse incrementUserCommends(IncrementUserCommendsRequest request){
+//    }
+
     public ChangeUserDataResponse toResponse(User user){
         return new ChangeUserDataResponse(
                 user.getUsername(),
                 user.getEmail(),
                 user.getCountryCode(),
                 user.isContainsProfilePicture(),
-                user.getProfilePictureUrl());
+                user.getProfilePictureUrl(),
+                user.getCountryCode(),
+                user.getCommends(),
+                user.getMessages()
+        );
+    }
 
+    public User validateUser (AuthRequest request){
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
+
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong password");
+        }
+        return user;
     }
 }

@@ -17,8 +17,8 @@ public class Branch {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "node_id", nullable = false)
-    private Node node;
+    @JoinColumn(name = "root_id", nullable = false)
+    private Root root;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -57,8 +57,8 @@ public class Branch {
 
     /* constructors */
 
-    public Branch(Node node, User user, String title, String description, Integer commentsCount, Integer rating, String tags, boolean containsPhoto, String photoOriginalUrl, String photoStoredUrl) {
-        this.node = node;
+    public Branch(Root root, User user, String title, String description, Integer commentsCount, Integer rating, String tags, boolean containsPhoto, String photoOriginalUrl, String photoStoredUrl) {
+        this.root = root;
         this.user = user;
         this.title = title;
         this.description = description;
@@ -79,8 +79,8 @@ public class Branch {
         return id;
     }
 
-    public Node getNode() {
-        return node;
+    public Root getRoot() {
+        return root;
     }
 
     public User getUser() {

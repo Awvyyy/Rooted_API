@@ -1,9 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.ChangeEmailRequest;
-import com.example.demo.dto.request.ChangePasswordRequest;
-import com.example.demo.dto.request.ChangeProfilePictureRequest;
-import com.example.demo.dto.request.ChangeUsernameRequest;
+import com.example.demo.dto.request.*;
 import com.example.demo.dto.response.ChangeUserDataResponse;
 import com.example.demo.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +35,11 @@ public class UserController {
     @PostMapping("/changeEmail")
     public ChangeUserDataResponse changeEmail(@RequestBody ChangeEmailRequest request){
         return userService.changeEmail(request);
+    }
+
+    @PostMapping("/changeCountry")
+    public ChangeUserDataResponse changeCountry(@RequestBody ChangeCountryRequest request){
+        return userService.changeCountry(request);
     }
 
 

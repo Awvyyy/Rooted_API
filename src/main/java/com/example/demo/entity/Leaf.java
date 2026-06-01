@@ -15,7 +15,7 @@ public class Leaf {
     @Column(nullable = false, updatable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch;
 
@@ -81,11 +81,11 @@ public class Leaf {
 
     /* setters */
 
-   public void changeCommentary(String commentary){
-       this.commentary = commentary;
-   }
+    public void changeCommentary(String commentary){
+        this.commentary = commentary;
+    }
 
-   public void changeRating(Integer rating){
-       this.rating = rating;
-   }
+    public void changeRating(Integer rating){
+        this.rating = rating;
+    }
 }
