@@ -15,4 +15,8 @@ public interface RootRepository extends JpaRepository<Root, Long> {
     Optional<Root> findByTitle(String title);
 
     boolean existsByTitle(String title);
+
+    Optional<Root> findByDescription(String description);
+
+    boolean existsByDescription(String description);
 }

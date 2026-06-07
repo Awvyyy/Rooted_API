@@ -32,22 +32,19 @@ public class Branch {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "comments_count", nullable = false, insertable = false)
+    @Column(name = "comments_count", nullable = false)
     private Integer commentsCount;
 
-    @Column(nullable = false, insertable = false)
+    @Column(nullable = false)
     private Integer rating;
 
     private String tags;
 
-    @Column(nullable = false)
+    @Column(name = "contains_photo", nullable = false)
     private boolean containsPhoto;
 
-    @Column(nullable = false)
-    private String photoOriginalUrl;
-
-    @Column(nullable = false)
-    private String photoStoredUrl;
+    @Column(name = "photo_url", nullable = true)
+    private String photoUrl;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -59,7 +56,7 @@ public class Branch {
 
     /* constructors */
 
-    public Branch(Root root, User user, String title, String description, Integer commentsCount, Integer rating, String tags, boolean containsPhoto, String photoOriginalUrl, String photoStoredUrl) {
+    public Branch(Root root, User user, String title, String description, Integer commentsCount, Integer rating, String tags, boolean containsPhoto, String photoUrl) {
         this.root = root;
         this.user = user;
         this.title = title;
@@ -68,8 +65,7 @@ public class Branch {
         this.rating = rating;
         this.tags = tags;
         this.containsPhoto = containsPhoto;
-        this.photoOriginalUrl = photoOriginalUrl;
-        this.photoStoredUrl = photoStoredUrl;
+        this.photoUrl = photoUrl;
     }
 
     protected Branch(){
@@ -114,11 +110,7 @@ public class Branch {
     }
 
     public String getPhotoOriginalUrl() {
-        return photoOriginalUrl;
-    }
-
-    public String getPhotoStoredUrl() {
-        return photoStoredUrl;
+        return photoUrl;
     }
 
     public Instant getCreatedAt() {
@@ -131,12 +123,9 @@ public class Branch {
 
     /* setters */
 
-    public void setPhotoStoredUrl(String photoStoredUrl) {
-        this.photoStoredUrl = photoStoredUrl;
-    }
 
     public void setPhotoOriginalUrl(String photoOriginalUrl) {
-        this.photoOriginalUrl = photoOriginalUrl;
+        this.photoUrl = photoUrl;
     }
 
     public void setContainsPhoto(boolean containsPhoto) {

@@ -1,6 +1,7 @@
 package com.example.demo.root;
 
 import com.example.demo.root.dto.request.*;
+import com.example.demo.root.dto.response.GetAllRoots;
 import com.example.demo.root.dto.response.RootResponse;
 import com.example.demo.user.User;
 import com.example.demo.user.UserService;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -47,18 +49,34 @@ public class RootService {
     }
 
     @Transactional
-    public RootResponse updateRootDescription(UpdateRootDescriptionRequest request, String email) {
-        Root root = validateRootOwnership(request, email);
+    public RootResponse updateRootDescription(String title, UpdateRootDescriptionRequest request, String email) {
+        Root root = validateRootOwnership(title, email);
 
         root.changeDescription(request.newDescription());
 
         return toResponse(root);
     }
 
-    private Root validateRootOwnership(RootOwnershipRequest request, String email) {
+    @Transactional(readOnly = true)
+    public GetAllRoots getAllRoots(){
+        List<RootResponse> allRoots = rootRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+        return new GetAllRoots(allRoots);
+    }
+
+    @Transactional(readOnly = true)
+    public RootResponse getRoot(String title){
+        Root root = rootRepository.findByTitle(title)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Root not found"));
+        return toResponse(root);
+    }
+
+    private Root validateRootOwnership(String title, String email) {
         User user = userService.validateUser(email);
 
-        Root root = rootRepository.findByTitle(request.title())
+        Root root = rootRepository.findByTitle(title)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Root not found"

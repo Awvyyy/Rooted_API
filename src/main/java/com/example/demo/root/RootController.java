@@ -2,13 +2,11 @@ package com.example.demo.root;
 
 import com.example.demo.root.dto.request.CreateRootRequest;
 import com.example.demo.root.dto.request.UpdateRootDescriptionRequest;
+import com.example.demo.root.dto.response.GetAllRoots;
 import com.example.demo.root.dto.response.RootResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/root")
@@ -27,11 +25,24 @@ public class RootController {
         return rootService.createRoot(request, jwt.getSubject());
     }
 
-    @PostMapping("/update")
+    @PatchMapping("/{title}/update")
     public RootResponse updateRoot(
+            @PathVariable String title,
             @RequestBody UpdateRootDescriptionRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
-        return rootService.updateRootDescription(request, jwt.getSubject());
+        return rootService.updateRootDescription(title, request, jwt.getSubject());
     }
+
+    @GetMapping()
+    public GetAllRoots getAllRoots(){
+        return rootService.getAllRoots();
+    }
+    @GetMapping("/{title}")
+    public RootResponse getRoot(@PathVariable String title){
+        return rootService.getRoot(title);
+
+    }
+
+    ///todo deleteMapping
 }

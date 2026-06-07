@@ -2,12 +2,13 @@ package com.example.demo.user;
 
 import com.example.demo.user.dto.request.*;
 import com.example.demo.user.dto.response.ChangeUserDataResponse;
+import com.example.demo.user.dto.response.GetUserResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user/settings")
+@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
@@ -16,7 +17,12 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PatchMapping("/changePassword")
+    @GetMapping("/{username}")
+    public GetUserResponse getUser(@PathVariable String username) {
+        return userService.getUser(username);
+    }
+
+    @PatchMapping("/settings/changePassword")
     public ChangeUserDataResponse changePassword(
             @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -24,7 +30,7 @@ public class UserController {
         return userService.changeUserPassword(request, jwt.getSubject());
     }
 
-    @PatchMapping("/changeUsername")
+    @PatchMapping("/settings/changeUsername")
     public ChangeUserDataResponse changeUsername(
             @RequestBody ChangeUsernameRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -32,7 +38,7 @@ public class UserController {
         return userService.changeUsername(request, jwt.getSubject());
     }
 
-    @PatchMapping("/changeEmail")
+    @PatchMapping("/settings/changeEmail")
     public ChangeUserDataResponse changeEmail(
             @RequestBody ChangeEmailRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -40,7 +46,7 @@ public class UserController {
         return userService.changeEmail(request, jwt.getSubject());
     }
 
-    @PatchMapping("/changeProfilePicture")
+    @PatchMapping("/settings/changeProfilePicture")
     public ChangeUserDataResponse changeProfilePicture(
             @RequestBody ChangeProfilePictureRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -48,11 +54,14 @@ public class UserController {
         return userService.changeProfilePicture(request, jwt.getSubject());
     }
 
-    @PatchMapping("/changeCountry")
+    @PatchMapping("/settings/changeCountry")
     public ChangeUserDataResponse changeCountry(
             @RequestBody ChangeCountryRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
         return userService.changeCountry(request, jwt.getSubject());
     }
+
+    /// todo delete user + email verification
+
 }

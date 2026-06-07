@@ -2,6 +2,7 @@ package com.example.demo.user;
 
 import com.example.demo.user.dto.response.ChangeUserDataResponse;
 import com.example.demo.user.dto.request.*;
+import com.example.demo.user.dto.response.GetUserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -97,6 +98,19 @@ public class UserService {
         user.setCountryCode(request.newCountryCode());
 
         return toResponse(user);
+    }
+
+    public GetUserResponse getUser (String username){
+        User user = userRepository.findByUsernameIgnoreCase(username).orElseThrow(()
+                -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        return new GetUserResponse(
+                user.getUsername(),
+                user.getContainsProfilePicture(),
+                user.getProfilePictureUrl(),
+                user.getCommends(),
+                user.getMessages(),
+                user.getCountryCode());
     }
 
     /// todo

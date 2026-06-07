@@ -14,4 +14,6 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 
     boolean existsBranchByTitle(String title);
 
+    boolean existsBranchByDescription(String description);
+
 }

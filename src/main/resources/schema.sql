@@ -56,6 +56,9 @@ create table branches(
                          rating INTEGER default 0,
 
                          tags VARCHAR(255),
+
+                         contains_photo BOOLEAN,
+                         photo_url TEXT,
                          created_at timestamptz not null default current_timestamp,
                          updated_at timestamptz not null default current_timestamp
 );
