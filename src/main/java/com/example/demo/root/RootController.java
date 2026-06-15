@@ -2,6 +2,7 @@ package com.example.demo.root;
 
 import com.example.demo.root.dto.request.CreateRootRequest;
 import com.example.demo.root.dto.request.UpdateRootDescriptionRequest;
+import com.example.demo.root.dto.response.DeleteRootResponse;
 import com.example.demo.root.dto.response.GetAllRoots;
 import com.example.demo.root.dto.response.RootResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,18 +32,28 @@ public class RootController {
             @RequestBody UpdateRootDescriptionRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
-        return rootService.updateRootDescription(title, request, jwt.getSubject());
+        return rootService.updateRootDescription(
+                title,
+                request,
+                jwt.getSubject()
+        );
     }
 
     @GetMapping()
     public GetAllRoots getAllRoots(){
         return rootService.getAllRoots();
     }
+
     @GetMapping("/{title}")
     public RootResponse getRoot(@PathVariable String title){
         return rootService.getRoot(title);
-
     }
 
-    ///todo deleteMapping
+    @DeleteMapping("/{title}")
+    public DeleteRootResponse deleteRootResponse(
+            @PathVariable String title,
+            @AuthenticationPrincipal Jwt jwt
+    ){
+        return rootService.deleteRoot(title, jwt.getSubject());
+    }
 }

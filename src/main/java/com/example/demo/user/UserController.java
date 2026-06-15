@@ -2,6 +2,7 @@ package com.example.demo.user;
 
 import com.example.demo.user.dto.request.*;
 import com.example.demo.user.dto.response.ChangeUserDataResponse;
+import com.example.demo.user.dto.response.DeleteUserResponse;
 import com.example.demo.user.dto.response.GetUserResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -62,6 +63,14 @@ public class UserController {
         return userService.changeCountry(request, jwt.getSubject());
     }
 
-    /// todo delete user + email verification
+    @DeleteMapping("settings/delete")
+    public DeleteUserResponse deleteUser(
+            @RequestBody DeleteUserRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ){
+        return userService.deleteUser(request, jwt.getSubject());
+    }
+
+    /// todo email verification
 
 }

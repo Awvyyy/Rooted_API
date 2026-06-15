@@ -1,6 +1,7 @@
 package com.example.demo.root;
 
 import com.example.demo.root.dto.request.*;
+import com.example.demo.root.dto.response.DeleteRootResponse;
 import com.example.demo.root.dto.response.GetAllRoots;
 import com.example.demo.root.dto.response.RootResponse;
 import com.example.demo.user.User;
@@ -29,11 +30,17 @@ public class RootService {
         User user = userService.validateUser(email);
 
         if (!user.isEmailVerified()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Verify your email first");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Verify your email first"
+            );
         }
 
         if (rootRepository.existsByTitle(request.title())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Root with this name already exists");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Root with this name already exists"
+            );
         }
 
         Root root = new Root(
@@ -49,7 +56,11 @@ public class RootService {
     }
 
     @Transactional
-    public RootResponse updateRootDescription(String title, UpdateRootDescriptionRequest request, String email) {
+    public RootResponse updateRootDescription(
+            String title,
+            UpdateRootDescriptionRequest request,
+            String email
+    ) {
         Root root = validateRootOwnership(title, email);
 
         root.changeDescription(request.newDescription());
@@ -57,7 +68,16 @@ public class RootService {
         return toResponse(root);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
+    public DeleteRootResponse deleteRoot(String title, String email){
+        Root root = validateRootOwnership(title, email);
+        rootRepository.delete(root);
+
+        return new DeleteRootResponse(
+                "Root: " + root.getTitle() + " deleted successfully"
+        );
+    }
+
     public GetAllRoots getAllRoots(){
         List<RootResponse> allRoots = rootRepository.findAll()
                 .stream()
@@ -66,10 +86,13 @@ public class RootService {
         return new GetAllRoots(allRoots);
     }
 
-    @Transactional(readOnly = true)
     public RootResponse getRoot(String title){
         Root root = rootRepository.findByTitle(title)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Root not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Root not found"
+                ));
+
         return toResponse(root);
     }
 
@@ -83,7 +106,10 @@ public class RootService {
                 ));
 
         if (!Objects.equals(root.getUser().getId(), user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No access to root");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No access to root"
+            );
         }
 
         return root;

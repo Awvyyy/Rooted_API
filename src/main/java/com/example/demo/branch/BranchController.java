@@ -3,6 +3,7 @@ package com.example.demo.branch;
 import com.example.demo.branch.dto.request.CreateBranchRequest;
 import com.example.demo.branch.dto.request.UpdateBranchDescriptionRequest;
 import com.example.demo.branch.dto.response.BranchResponse;
+import com.example.demo.branch.dto.response.DeleteBranchResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +19,31 @@ public class BranchController {
     }
 
     @PostMapping("/create")
-    public BranchResponse createBranch (@RequestBody CreateBranchRequest request, @AuthenticationPrincipal Jwt jwt){
+    public BranchResponse createBranch(
+            @RequestBody CreateBranchRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ){
         return branchService.createBranch(request, jwt.getSubject());
     }
 
     @PatchMapping("{title}/update")
-    public BranchResponse updateBranch (@PathVariable String title, @RequestBody UpdateBranchDescriptionRequest request, @AuthenticationPrincipal Jwt jwt){
-        return branchService.updateBranch(request, jwt.getSubject(), title);
+    public BranchResponse updateBranch(
+            @PathVariable String title,
+            @RequestBody UpdateBranchDescriptionRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ){
+        return branchService.updateBranch(
+                request,
+                jwt.getSubject(),
+                title
+        );
     }
 
-    /// todo: delete branch, add pathvariables to update/delete mappings.
+    @DeleteMapping("{title}/delete")
+    public DeleteBranchResponse deleteBranch(
+            @PathVariable String title,
+            @AuthenticationPrincipal Jwt jwt
+    ){
+        return branchService.deleteBranch(title, jwt.getSubject());
+    }
 }

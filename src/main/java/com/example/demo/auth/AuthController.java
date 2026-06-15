@@ -4,7 +4,9 @@ import com.example.demo.auth.dto.request.LoginRequest;
 import com.example.demo.auth.dto.request.RegisterRequest;
 import com.example.demo.auth.dto.response.LoginResponse;
 import com.example.demo.auth.dto.response.RegisterResponse;
+import com.example.demo.emailVerification.VerificationService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,8 +14,13 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    public AuthController(AuthService authService){
+    private final VerificationService verificationService;
+    public AuthController(
+            AuthService authService,
+            VerificationService verificationService
+    ){
         this.authService = authService;
+        this.verificationService = verificationService;
     }
 
     @PostMapping("/register")
@@ -26,5 +33,15 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     public LoginResponse login (@RequestBody LoginRequest request){
         return authService.userLogin(request);
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<String> verify(
+            @RequestParam String token
+    ) {
+
+        verificationService.verifyEmail(token);
+
+        return ResponseEntity.ok("Email verified");
     }
 }

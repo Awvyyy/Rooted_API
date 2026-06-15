@@ -2,6 +2,7 @@ package com.example.demo.user;
 
 import com.example.demo.user.dto.response.ChangeUserDataResponse;
 import com.example.demo.user.dto.request.*;
+import com.example.demo.user.dto.response.DeleteUserResponse;
 import com.example.demo.user.dto.response.GetUserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,17 +28,22 @@ public class UserService {
         User user = validateUser(email);
 
         if (passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong Password");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Wrong Password"
+            );
         }
 
         if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't use old password");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Can't use old password"
+            );
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
 
         return toResponse(user);
-
     }
 
     @Transactional
@@ -46,11 +52,13 @@ public class UserService {
         User user = validateUser(email);
 
         if (userRepository.existsByUsername(request.newUsername())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already registered");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Username is already registered"
+            );
         }
 
         user.rename(request.newUsername());
-
         return toResponse(user);
     }
 
@@ -59,11 +67,17 @@ public class UserService {
         User user = validateUser(email);
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong password");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Wrong password"
+            );
         }
 
         if (userRepository.existsByEmail(request.newEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email is already registered"
+            );
         }
 
         user.changeEmail(request.newEmail());
@@ -77,7 +91,10 @@ public class UserService {
         User user = validateUser(email);
 
         if (Objects.equals(user.getProfilePictureUrl(), request.profilePictureUrl())){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Choose new profile picture");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Choose new profile picture"
+            );
         }
 
         user.setContainsProfilePicture(true);
@@ -92,7 +109,10 @@ public class UserService {
         User user = validateUser(email);
 
         if (user.getCountryCode().equals(request.newCountryCode())){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Choose new country");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Choose new country"
+            );
         }
 
         user.setCountryCode(request.newCountryCode());
@@ -101,8 +121,11 @@ public class UserService {
     }
 
     public GetUserResponse getUser (String username){
-        User user = userRepository.findByUsernameIgnoreCase(username).orElseThrow(()
-                -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
 
         return new GetUserResponse(
                 user.getUsername(),
@@ -111,6 +134,28 @@ public class UserService {
                 user.getCommends(),
                 user.getMessages(),
                 user.getCountryCode());
+    }
+
+    @Transactional
+    public DeleteUserResponse deleteUser (DeleteUserRequest request, String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Wrong email or password"
+            );
+        }
+
+        userRepository.delete(user);
+
+        return new DeleteUserResponse(
+                "User: " + user.getUsername() + " deleted successfully"
+        );
     }
 
     /// todo
