@@ -1,11 +1,16 @@
 package com.example.demo.leaf;
 
+import com.example.demo.branch.Branch;
+import com.example.demo.branch.BranchRepository;
 import com.example.demo.leaf.dto.request.CreateLeafRequest;
 import com.example.demo.leaf.dto.request.DeleteLeafRequest;
 import com.example.demo.leaf.dto.request.EditLeafRequest;
 import com.example.demo.leaf.dto.request.UniqueLeaf;
 import com.example.demo.leaf.dto.response.DeleteLeafResponse;
 import com.example.demo.leaf.dto.response.LeafResponse;
+import com.example.demo.messaging.LeafLike;
+import com.example.demo.messaging.LeafLikeRepository;
+import com.example.demo.outbox.OutboxEventService;
 import com.example.demo.user.User;
 import com.example.demo.user.UserService;
 import org.springframework.http.HttpStatus;
@@ -17,14 +22,23 @@ import org.springframework.web.server.ResponseStatusException;
 public class LeafService {
 
     private final LeafRepository leafRepository;
+    private final BranchRepository branchRepository;
     private final UserService userService;
+    private final LeafLikeRepository leafLikeRepository;
+    private final OutboxEventService outboxEventService;
 
     public LeafService(
             LeafRepository leafRepository,
-            UserService userService
+            BranchRepository branchRepository,
+            UserService userService,
+            LeafLikeRepository leafLikeRepository,
+            OutboxEventService outboxEventService
     ) {
         this.leafRepository = leafRepository;
+        this.branchRepository = branchRepository;
         this.userService = userService;
+        this.leafLikeRepository = leafLikeRepository;
+        this.outboxEventService = outboxEventService;
     }
 
     public LeafResponse createLeaf(
@@ -33,10 +47,16 @@ public class LeafService {
     ) {
         User user = getVerifiedUser(email);
 
-        verifyLeafUnique(request, user);
+        Branch branch = branchRepository.findById(request.branchId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Branch not found"
+                ));
+
+        verifyLeafUnique(request, user, branch);
 
         Leaf leaf = new Leaf(
-                request.branch(),
+                branch,
                 user,
                 request.commentary(),
                 0
@@ -54,19 +74,25 @@ public class LeafService {
     ) {
         User user = getVerifiedUser(email);
 
+        Branch branch = branchRepository.findById(request.branchId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Branch not found"
+                ));
+
         Leaf leaf = leafRepository
-                .findLeafByCommentaryAndUserAndBranch(commentary, user, request.branch())
+                .findLeafByCommentaryAndUserAndBranch(commentary, user, branch)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Leaf not found"
                 ));
 
         boolean changed =
-                !leaf.getCommentary().equals(request.commentary()) ||
-                        !leaf.getBranch().equals(request.branch());
+                !leaf.getCommentary().equals(request.commentary())
+                        || !leaf.getBranch().equals(branch);
 
         if (changed) {
-            verifyLeafUnique(request, user);
+            verifyLeafUnique(request, user, branch);
         }
 
         leaf.changeCommentary(request.commentary());
@@ -77,6 +103,41 @@ public class LeafService {
     }
 
     @Transactional
+    public void likeLeaf(Long leafId, String email) {
+
+        User user = getVerifiedUser(email);
+
+        Leaf leaf = leafRepository.findById(leafId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Leaf not found"
+                ));
+
+        boolean alreadyLiked = leafLikeRepository.existsByLeaf_IdAndUser_Id(
+                leafId,
+                user.getId()
+        );
+
+        if (alreadyLiked) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Leaf already liked"
+            );
+        }
+
+        LeafLike leafLike = new LeafLike(leaf, user);
+        leafLikeRepository.save(leafLike);
+
+        Long rootId = leaf.getBranch().getRoot().getId();
+
+        outboxEventService.saveLeafLikedEvent(
+                leafId,
+                rootId,
+                user.getId()
+        );
+    }
+
+    @Transactional
     public DeleteLeafResponse deleteLeaf(
             String commentary,
             String email,
@@ -84,8 +145,14 @@ public class LeafService {
     ) {
         User user = getVerifiedUser(email);
 
+        Branch branch = branchRepository.findById(request.branchId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Branch not found"
+                ));
+
         Leaf leaf = leafRepository
-                .findLeafByCommentaryAndUserAndBranch(commentary, user, request.branch())
+                .findLeafByCommentaryAndUserAndBranch(commentary, user, branch)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Leaf not found"
@@ -111,12 +178,13 @@ public class LeafService {
 
     private void verifyLeafUnique(
             UniqueLeaf request,
-            User user
+            User user,
+            Branch branch
     ) {
         boolean exists = leafRepository.existsByCommentaryAndUserAndBranch(
                 request.commentary(),
                 user,
-                request.branch()
+                branch
         );
 
         if (exists) {

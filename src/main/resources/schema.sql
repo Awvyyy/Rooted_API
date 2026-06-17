@@ -96,3 +96,42 @@ create table verification_tokens(
 
                                     created_at timestamptz not null default current_timestamp
 );
+
+/* RabbitMQ outbox pattern, message guarantee */
+CREATE TABLE outbox_events (
+                               id UUID PRIMARY KEY,
+                               event_type VARCHAR(255) NOT NULL,
+                               exchange_name VARCHAR(255) NOT NULL,
+                               routing_key VARCHAR(255) NOT NULL,
+                               payload TEXT NOT NULL,
+                               status VARCHAR(50) NOT NULL,
+                               attempts INTEGER NOT NULL DEFAULT 0,
+                               last_error TEXT,
+                               created_at TIMESTAMP NOT NULL,
+                               sent_at TIMESTAMP
+);
+
+CREATE INDEX idx_outbox_events_status_created_at
+    ON outbox_events (status, created_at);
+
+/* Table, that represents who liked a leaf */
+CREATE TABLE leaf_likes (
+                            id UUID PRIMARY KEY,
+                            leaf_id BIGINT NOT NULL,
+                            user_id BIGINT NOT NULL,
+                            created_at TIMESTAMP NOT NULL,
+
+                            CONSTRAINT uq_leaf_likes_leaf_user UNIQUE (leaf_id, user_id),
+
+                            CONSTRAINT fk_leaf_likes_leaf
+                                FOREIGN KEY (leaf_id) REFERENCES leaves(id),
+
+                            CONSTRAINT fk_leaf_likes_user
+                                FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE INDEX idx_leaf_likes_leaf_id
+    ON leaf_likes (leaf_id);
+
+CREATE INDEX idx_leaf_likes_user_id
+    ON leaf_likes (user_id);

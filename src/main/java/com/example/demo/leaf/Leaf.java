@@ -14,21 +14,20 @@ public class Leaf {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false, updatable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
     private String commentary;
 
-    @Column(nullable = false, insertable = false)
+    @Column(nullable = false)
     private Integer rating;
 
     @CreationTimestamp
@@ -39,16 +38,13 @@ public class Leaf {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    /* constructors */
+    protected Leaf() {}
 
     public Leaf(Branch branch, User user, String commentary, Integer rating) {
         this.branch = branch;
         this.user = user;
         this.commentary = commentary;
         this.rating = rating;
-    }
-
-    protected Leaf(){
     }
 
     /* getters */
@@ -83,11 +79,11 @@ public class Leaf {
 
     /* setters */
 
-    public void changeCommentary(String commentary){
+    public void changeCommentary(String commentary) {
         this.commentary = commentary;
     }
 
-    public void changeRating(Integer rating){
+    public void changeRating(Integer rating) {
         this.rating = rating;
     }
 }

@@ -195,4 +195,12 @@ public class UserService {
                         "User not found"
                 ));
     }
+
+    public User validateUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+    }
 }

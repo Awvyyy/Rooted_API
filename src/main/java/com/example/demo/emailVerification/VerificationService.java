@@ -1,5 +1,6 @@
 package com.example.demo.emailVerification;
 
+import com.example.demo.outbox.OutboxEventService;
 import com.example.demo.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -13,14 +14,14 @@ import java.util.UUID;
 public class VerificationService {
 
     private final EmailTokenRepository tokenRepository;
-    private final EmailService emailService;
+    private final OutboxEventService outboxEventService;
 
     public VerificationService(
             EmailTokenRepository tokenRepository,
-            EmailService emailService
+            OutboxEventService outboxEventService
     ) {
         this.tokenRepository = tokenRepository;
-        this.emailService = emailService;
+        this.outboxEventService = outboxEventService;
     }
 
     public void sendVerificationEmail(User user) {
@@ -41,10 +42,9 @@ public class VerificationService {
         String verificationLink =
                 "http://localhost:8080/auth/verify?token=" + token;
 
-        emailService.sendVerificationEmail(
-                user.getEmail(),
-                verificationLink
-        );
+        String email = user.getEmail();
+
+        outboxEventService.saveEmailVerificationEvent(email, verificationLink);
     }
 
     @Transactional
@@ -80,9 +80,9 @@ public class VerificationService {
 
         tokenRepository.delete(emailToken);
 
-        emailService.sendGreetingEmail(
-                user.getEmail(),
-                user.getUsername()
-        );
+        String email = user.getEmail();
+        String username = user.getUsername();
+
+        outboxEventService.saveGreetingEmailEvent(email, username);
     }
 }

@@ -5,6 +5,7 @@ import com.example.demo.leaf.dto.request.DeleteLeafRequest;
 import com.example.demo.leaf.dto.request.EditLeafRequest;
 import com.example.demo.leaf.dto.response.DeleteLeafResponse;
 import com.example.demo.leaf.dto.response.LeafResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +21,10 @@ public class LeafController {
 
     @PostMapping("/create")
     public LeafResponse createLeaf(
-            @RequestParam CreateLeafRequest request,
+            @RequestBody CreateLeafRequest request,
             @AuthenticationPrincipal Jwt jwt
-    ){
-        return leafService.createLeaf(
-                request,
-                jwt.getSubject()
-        );
+    ) {
+        return leafService.createLeaf(request, jwt.getSubject());
     }
 
     @PatchMapping("/{commentary}/edit")
@@ -34,12 +32,8 @@ public class LeafController {
             @PathVariable String commentary,
             @RequestBody EditLeafRequest request,
             @AuthenticationPrincipal Jwt jwt
-    ){
-        return leafService.editLeaf(
-                commentary,
-                request,
-                jwt.getSubject()
-        );
+    ) {
+        return leafService.editLeaf(commentary, request, jwt.getSubject());
     }
 
     @DeleteMapping("/{commentary}/delete")
@@ -47,11 +41,16 @@ public class LeafController {
             @PathVariable String commentary,
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody DeleteLeafRequest request
-    ){
-        return leafService.deleteLeaf(
-                commentary,
-                jwt.getSubject(),
-                request
-        );
+    ) {
+        return leafService.deleteLeaf(commentary, jwt.getSubject(), request);
+    }
+
+    @PostMapping("/{leafId}/like")
+    public ResponseEntity<Void> likeLeaf(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long leafId
+    ) {
+        leafService.likeLeaf(leafId, jwt.getSubject());
+        return ResponseEntity.accepted().build();
     }
 }
