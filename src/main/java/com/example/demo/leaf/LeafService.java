@@ -3,7 +3,6 @@ package com.example.demo.leaf;
 import com.example.demo.branch.Branch;
 import com.example.demo.branch.BranchRepository;
 import com.example.demo.leaf.dto.request.CreateLeafRequest;
-import com.example.demo.leaf.dto.request.DeleteLeafRequest;
 import com.example.demo.leaf.dto.request.EditLeafRequest;
 import com.example.demo.leaf.dto.request.UniqueLeaf;
 import com.example.demo.leaf.dto.response.DeleteLeafResponse;
@@ -13,10 +12,13 @@ import com.example.demo.messaging.LeafLikeRepository;
 import com.example.demo.outbox.OutboxEventService;
 import com.example.demo.user.User;
 import com.example.demo.user.UserService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Objects;
 
 @Service
 public class LeafService {
@@ -41,17 +43,14 @@ public class LeafService {
         this.outboxEventService = outboxEventService;
     }
 
+    @Transactional
     public LeafResponse createLeaf(
             CreateLeafRequest request,
             String email
     ) {
         User user = getVerifiedUser(email);
-
-        Branch branch = branchRepository.findById(request.branchId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Branch not found"
-                ));
+        Branch branch = branchRepository.findBranchById(request.branchId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found"));
 
         verifyLeafUnique(request, user, branch);
 
@@ -62,49 +61,39 @@ public class LeafService {
                 0
         );
 
-        leafRepository.save(leaf);
+        leafRepository.saveAndFlush(leaf);
+        branch.incrementCommentsCount();
 
         return toResponse(leaf);
     }
 
+    @Transactional
     public LeafResponse editLeaf(
-            String commentary,
+            Long leafId,
             EditLeafRequest request,
             String email
     ) {
         User user = getVerifiedUser(email);
-
-        Branch branch = branchRepository.findById(request.branchId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Branch not found"
-                ));
-
-        Leaf leaf = leafRepository
-                .findLeafByCommentaryAndUserAndBranch(commentary, user, branch)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Leaf not found"
-                ));
+        Leaf leaf = getOwnedLeaf(leafId, user);
+        Branch branch = branchRepository.findBranchById(request.branchId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found"));
 
         boolean changed =
                 !leaf.getCommentary().equals(request.commentary())
-                        || !leaf.getBranch().equals(branch);
+                        || !Objects.equals(leaf.getBranch().getId(), branch.getId());
 
         if (changed) {
             verifyLeafUnique(request, user, branch);
         }
 
+        leaf.changeBranch(branch);
         leaf.changeCommentary(request.commentary());
-
-        leafRepository.save(leaf);
 
         return toResponse(leaf);
     }
 
     @Transactional
     public void likeLeaf(Long leafId, String email) {
-
         User user = getVerifiedUser(email);
 
         Leaf leaf = leafRepository.findById(leafId)
@@ -113,54 +102,85 @@ public class LeafService {
                         "Leaf not found"
                 ));
 
-        boolean alreadyLiked = leafLikeRepository.existsByLeaf_IdAndUser_Id(
-                leafId,
-                user.getId()
-        );
-
-        if (alreadyLiked) {
+        try {
+            LeafLike leafLike = new LeafLike(leaf, user);
+            leafLikeRepository.saveAndFlush(leafLike);
+        } catch (DataIntegrityViolationException exception) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Leaf already liked"
             );
         }
 
-        LeafLike leafLike = new LeafLike(leaf, user);
-        leafLikeRepository.save(leafLike);
-
-        Long rootId = leaf.getBranch().getRoot().getId();
-
         outboxEventService.saveLeafLikedEvent(
                 leafId,
-                rootId,
+                leaf.getBranch().getId(),
+                user.getId()
+        );
+    }
+
+    @Transactional
+    public void unlikeLeaf(Long leafId, String email) {
+        User user = getVerifiedUser(email);
+
+        Leaf leaf = leafRepository.findById(leafId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Leaf not found"
+                ));
+
+        LeafLike leafLike = leafLikeRepository.findByLeaf_IdAndUser_Id(
+                leafId,
+                user.getId()
+        ).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Leaf is not liked"
+        ));
+
+        leafLikeRepository.delete(leafLike);
+
+        outboxEventService.saveLeafUnlikedEvent(
+                leafId,
+                leaf.getBranch().getId(),
                 user.getId()
         );
     }
 
     @Transactional
     public DeleteLeafResponse deleteLeaf(
-            String commentary,
-            String email,
-            DeleteLeafRequest request
+            Long leafId,
+            String email
     ) {
         User user = getVerifiedUser(email);
+        Leaf leaf = getOwnedLeaf(leafId, user);
 
-        Branch branch = branchRepository.findById(request.branchId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Branch not found"
-                ));
+        String commentary = leaf.getCommentary();
+        Branch branch = leaf.getBranch();
 
-        Leaf leaf = leafRepository
-                .findLeafByCommentaryAndUserAndBranch(commentary, user, branch)
+        leafLikeRepository.deleteByLeaf_Id(leafId);
+        leafRepository.delete(leaf);
+        branch.decrementCommentsCount();
+
+        return new DeleteLeafResponse(
+                "Leaf: " + commentary + " deleted successfully"
+        );
+    }
+
+    private Leaf getOwnedLeaf(Long leafId, User user) {
+        Leaf leaf = leafRepository.findById(leafId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Leaf not found"
                 ));
 
-        leafRepository.delete(leaf);
+        if (!Objects.equals(leaf.getUser().getId(), user.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No access to leaf"
+            );
+        }
 
-        return new DeleteLeafResponse("Leaf: " + commentary + " deleted successfully");
+        return leaf;
     }
 
     private User getVerifiedUser(String email) {

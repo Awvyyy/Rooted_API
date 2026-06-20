@@ -5,6 +5,7 @@ import com.example.demo.root.dto.request.UpdateRootDescriptionRequest;
 import com.example.demo.root.dto.response.DeleteRootResponse;
 import com.example.demo.root.dto.response.GetAllRoots;
 import com.example.demo.root.dto.response.RootResponse;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class RootController {
 
     @PostMapping("/create")
     public RootResponse createRoot(
-            @RequestBody CreateRootRequest request,
+            @Valid @RequestBody CreateRootRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
         return rootService.createRoot(request, jwt.getSubject());
@@ -29,7 +30,7 @@ public class RootController {
     @PatchMapping("/{title}/update")
     public RootResponse updateRoot(
             @PathVariable String title,
-            @RequestBody UpdateRootDescriptionRequest request,
+            @Valid @RequestBody UpdateRootDescriptionRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
         return rootService.updateRootDescription(

@@ -1,7 +1,7 @@
 package com.example.demo.messaging;
 
 import com.example.demo.config.RabbitConfig;
-import com.example.demo.messaging.dto.LeafLikedMessage;
+import com.example.demo.messaging.dto.LeafStatsMessage;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ public class LeafStatsListener {
     }
 
     @RabbitListener(queues = RabbitConfig.LEAF_STATS_QUEUE)
-    public void handleLeafLiked(LeafLikedMessage message) {
+    public void handleLeafStats(LeafStatsMessage message) {
         leafStatsService.recalculateLikesCount(message.leafId());
     }
 }

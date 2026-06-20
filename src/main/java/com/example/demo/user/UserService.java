@@ -1,7 +1,7 @@
 package com.example.demo.user;
 
-import com.example.demo.user.dto.response.ChangeUserDataResponse;
 import com.example.demo.user.dto.request.*;
+import com.example.demo.user.dto.response.ChangeUserDataResponse;
 import com.example.demo.user.dto.response.DeleteUserResponse;
 import com.example.demo.user.dto.response.GetUserResponse;
 import org.springframework.http.HttpStatus;
@@ -27,10 +27,10 @@ public class UserService {
     public ChangeUserDataResponse changeUserPassword (ChangePasswordRequest request, String email) {
         User user = validateUser(email);
 
-        if (passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())){
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Wrong Password"
+                    "Wrong password"
             );
         }
 
@@ -120,6 +120,7 @@ public class UserService {
         return toResponse(user);
     }
 
+    @Transactional(readOnly = true)
     public GetUserResponse getUser (String username){
         User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -180,9 +181,9 @@ public class UserService {
         return new ChangeUserDataResponse(
                 user.getUsername(),
                 user.getEmail(),
-                user.getCountryCode(),
-                user.isContainsProfilePicture(),
                 user.getProfilePictureUrl(),
+                user.isContainsProfilePicture(),
+                user.getCountryCode(),
                 user.getCommends(),
                 user.getMessages()
         );

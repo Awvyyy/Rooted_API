@@ -29,7 +29,7 @@ create table roots(
                           references users(id),
 
 
-                      title VARCHAR(255) not null,
+                      title VARCHAR(255) not null unique,
                       description TEXT not null,
 
                       activity_rating INTEGER default 0 not null,
@@ -77,6 +77,9 @@ create table leaves(
                        commentary TEXT not null,
                        rating INTEGER default 0 not null,
 
+                       constraint uq_leaves_branch_author_commentary
+                           unique (branch_id, author_id, commentary),
+
                        created_at timestamptz not null default current_timestamp,
                        updated_at timestamptz not null default current_timestamp
 );
@@ -108,6 +111,7 @@ CREATE TABLE outbox_events (
                                attempts INTEGER NOT NULL DEFAULT 0,
                                last_error TEXT,
                                created_at TIMESTAMP NOT NULL,
+                               processing_at TIMESTAMP,
                                sent_at TIMESTAMP
 );
 

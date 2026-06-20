@@ -4,6 +4,7 @@ import com.example.demo.branch.dto.request.CreateBranchRequest;
 import com.example.demo.branch.dto.request.UpdateBranchDescriptionRequest;
 import com.example.demo.branch.dto.response.BranchResponse;
 import com.example.demo.branch.dto.response.DeleteBranchResponse;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -20,16 +21,16 @@ public class BranchController {
 
     @PostMapping("/create")
     public BranchResponse createBranch(
-            @RequestBody CreateBranchRequest request,
+            @Valid @RequestBody CreateBranchRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
         return branchService.createBranch(request, jwt.getSubject());
     }
 
-    @PatchMapping("{title}/update")
+    @PatchMapping("/{title}/update")
     public BranchResponse updateBranch(
             @PathVariable String title,
-            @RequestBody UpdateBranchDescriptionRequest request,
+            @Valid @RequestBody UpdateBranchDescriptionRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
         return branchService.updateBranch(
@@ -39,7 +40,7 @@ public class BranchController {
         );
     }
 
-    @DeleteMapping("{title}/delete")
+    @DeleteMapping("/{title}/delete")
     public DeleteBranchResponse deleteBranch(
             @PathVariable String title,
             @AuthenticationPrincipal Jwt jwt

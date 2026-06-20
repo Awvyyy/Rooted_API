@@ -1,11 +1,11 @@
 package com.example.demo.emailVerification;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 public class EmailService {
@@ -108,6 +108,7 @@ public class EmailService {
     public void sendGreetingEmail(String email, String username) {
 
         try {
+            String safeUsername = HtmlUtils.htmlEscape(username);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
 
@@ -159,7 +160,7 @@ public class EmailService {
 
         </body>
         </html>
-        """.formatted(username), true);
+        """.formatted(safeUsername), true);
 
             mailSender.send(mimeMessage);
         } catch (Exception e) {

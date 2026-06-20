@@ -83,6 +83,10 @@ public class Leaf {
         this.commentary = commentary;
     }
 
+    public void changeBranch(Branch branch) {
+        this.branch = branch;
+    }
+
     public void changeRating(Integer rating) {
         this.rating = rating;
     }

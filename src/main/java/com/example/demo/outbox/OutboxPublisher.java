@@ -1,31 +1,38 @@
 package com.example.demo.outbox;
 
-import com.example.demo.messaging.dto.EmailVerificationMessage;
 import com.example.demo.messaging.dto.EmailGreetingMessage;
-import com.example.demo.messaging.dto.LeafLikedMessage;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
+import com.example.demo.messaging.dto.EmailVerificationMessage;
+import com.example.demo.messaging.dto.LeafStatsMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
 @Component
 public class OutboxPublisher {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(OutboxPublisher.class);
+
     private static final int BATCH_SIZE = 20;
 
+    private final OutboxEventClaimer outboxEventClaimer;
     private final OutboxEventRepository outboxEventRepository;
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
 
     public OutboxPublisher(
+            OutboxEventClaimer outboxEventClaimer,
             OutboxEventRepository outboxEventRepository,
             RabbitTemplate rabbitTemplate,
             ObjectMapper objectMapper
     ) {
+        this.outboxEventClaimer = outboxEventClaimer;
         this.outboxEventRepository = outboxEventRepository;
         this.rabbitTemplate = rabbitTemplate;
         this.objectMapper = objectMapper;
@@ -34,10 +41,13 @@ public class OutboxPublisher {
     @Scheduled(fixedDelayString = "${outbox.publisher.fixed-delay-ms:5000}")
     public void publishPendingEvents() {
         List<OutboxEvent> events =
-                outboxEventRepository.findByStatusOrderByCreatedAtAsc(
-                        OutboxStatus.PENDING,
-                        PageRequest.of(0, BATCH_SIZE)
-                );
+                outboxEventClaimer.claimPendingEvents(BATCH_SIZE);
+
+        if (events.isEmpty()) {
+            return;
+        }
+
+        log.debug("Claimed {} outbox events for publishing", events.size());
 
         for (OutboxEvent event : events) {
             publishEvent(event);
@@ -56,9 +66,28 @@ public class OutboxPublisher {
 
             event.markAsSent();
             outboxEventRepository.save(event);
+
+            log.debug(
+                    "Published outbox event id={}, type={}, routingKey={}",
+                    event.getId(),
+                    event.getEventType(),
+                    event.getRoutingKey()
+            );
+
         } catch (Exception exception) {
-            event.registerFailure(cutErrorMessage(exception));
+            String errorMessage = cutErrorMessage(exception);
+
+            event.registerFailure(errorMessage);
             outboxEventRepository.save(event);
+
+            log.warn(
+                    "Failed to publish outbox event id={}, type={}, routingKey={}, error={}",
+                    event.getId(),
+                    event.getEventType(),
+                    event.getRoutingKey(),
+                    errorMessage,
+                    exception
+            );
         }
     }
 
@@ -77,11 +106,12 @@ public class OutboxPublisher {
                             EmailGreetingMessage.class
                     );
 
-            case OutboxEventService.LEAF_LIKED ->
-                objectMapper.readValue(
-                        event.getPayload(),
-                        LeafLikedMessage.class
-                );
+            case OutboxEventService.LEAF_LIKED,
+                 OutboxEventService.LEAF_UNLIKED ->
+                    objectMapper.readValue(
+                            event.getPayload(),
+                            LeafStatsMessage.class
+                    );
 
             default -> throw new IllegalStateException(
                     "Unsupported outbox event type: " + event.getEventType()
@@ -93,7 +123,7 @@ public class OutboxPublisher {
         String message = exception.getMessage();
 
         if (message == null) {
-            message = exception.getClass().getSimpleName();
+            return exception.getClass().getSimpleName();
         }
 
         if (message.length() > 1000) {

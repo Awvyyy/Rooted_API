@@ -1,16 +1,17 @@
 package com.example.demo.leaf;
 
 import com.example.demo.leaf.dto.request.CreateLeafRequest;
-import com.example.demo.leaf.dto.request.DeleteLeafRequest;
 import com.example.demo.leaf.dto.request.EditLeafRequest;
 import com.example.demo.leaf.dto.response.DeleteLeafResponse;
 import com.example.demo.leaf.dto.response.LeafResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/leaves")
 public class LeafController {
 
     private final LeafService leafService;
@@ -19,30 +20,29 @@ public class LeafController {
         this.leafService = leafService;
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public LeafResponse createLeaf(
-            @RequestBody CreateLeafRequest request,
+            @Valid @RequestBody CreateLeafRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
         return leafService.createLeaf(request, jwt.getSubject());
     }
 
-    @PatchMapping("/{commentary}/edit")
+    @PatchMapping("/{leafId}")
     public LeafResponse editLeaf(
-            @PathVariable String commentary,
-            @RequestBody EditLeafRequest request,
+            @PathVariable Long leafId,
+            @Valid @RequestBody EditLeafRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return leafService.editLeaf(commentary, request, jwt.getSubject());
+        return leafService.editLeaf(leafId, request, jwt.getSubject());
     }
 
-    @DeleteMapping("/{commentary}/delete")
+    @DeleteMapping("/{leafId}")
     public DeleteLeafResponse deleteLeaf(
-            @PathVariable String commentary,
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestBody DeleteLeafRequest request
+            @PathVariable Long leafId,
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        return leafService.deleteLeaf(commentary, jwt.getSubject(), request);
+        return leafService.deleteLeaf(leafId, jwt.getSubject());
     }
 
     @PostMapping("/{leafId}/like")
@@ -51,6 +51,15 @@ public class LeafController {
             @PathVariable Long leafId
     ) {
         leafService.likeLeaf(leafId, jwt.getSubject());
+        return ResponseEntity.accepted().build();
+    }
+
+    @DeleteMapping("/{leafId}/unlike")
+    public ResponseEntity<Void> unlikeLeaf(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long leafId
+    ){
+        leafService.unlikeLeaf(leafId, jwt.getSubject());
         return ResponseEntity.accepted().build();
     }
 }

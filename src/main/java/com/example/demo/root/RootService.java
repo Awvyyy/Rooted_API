@@ -1,6 +1,7 @@
 package com.example.demo.root;
 
-import com.example.demo.root.dto.request.*;
+import com.example.demo.root.dto.request.CreateRootRequest;
+import com.example.demo.root.dto.request.UpdateRootDescriptionRequest;
 import com.example.demo.root.dto.response.DeleteRootResponse;
 import com.example.demo.root.dto.response.GetAllRoots;
 import com.example.demo.root.dto.response.RootResponse;
@@ -78,6 +79,7 @@ public class RootService {
         );
     }
 
+    @Transactional(readOnly = true)
     public GetAllRoots getAllRoots(){
         List<RootResponse> allRoots = rootRepository.findAll()
                 .stream()
@@ -86,6 +88,7 @@ public class RootService {
         return new GetAllRoots(allRoots);
     }
 
+    @Transactional(readOnly = true)
     public RootResponse getRoot(String title){
         Root root = rootRepository.findByTitle(title)
                 .orElseThrow(() -> new ResponseStatusException(

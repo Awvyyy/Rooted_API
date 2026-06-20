@@ -147,4 +147,14 @@ public class Branch {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public void incrementCommentsCount() {
+        this.commentsCount++;
+    }
+
+    public void decrementCommentsCount() {
+        if (this.commentsCount > 0) {
+            this.commentsCount--;
+        }
+    }
 }

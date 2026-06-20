@@ -3,6 +3,7 @@ package com.example.demo.emailVerification;
 import com.example.demo.outbox.OutboxEventService;
 import com.example.demo.user.User;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,13 +16,16 @@ public class VerificationService {
 
     private final EmailTokenRepository tokenRepository;
     private final OutboxEventService outboxEventService;
+    private final String publicBaseUrl;
 
     public VerificationService(
             EmailTokenRepository tokenRepository,
-            OutboxEventService outboxEventService
+            OutboxEventService outboxEventService,
+            @Value("${app.public-base-url:http://localhost:8080}") String publicBaseUrl
     ) {
         this.tokenRepository = tokenRepository;
         this.outboxEventService = outboxEventService;
+        this.publicBaseUrl = publicBaseUrl;
     }
 
     public void sendVerificationEmail(User user) {
@@ -40,7 +44,7 @@ public class VerificationService {
         tokenRepository.save(emailToken);
 
         String verificationLink =
-                "http://localhost:8080/auth/verify?token=" + token;
+                publicBaseUrl + "/auth/verify?token=" + token;
 
         String email = user.getEmail();
 

@@ -7,11 +7,11 @@ import com.example.demo.auth.dto.response.RegisterResponse;
 import com.example.demo.emailVerification.VerificationService;
 import com.example.demo.token.JwtService;
 import com.example.demo.user.User;
+import com.example.demo.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.demo.user.UserRepository;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service

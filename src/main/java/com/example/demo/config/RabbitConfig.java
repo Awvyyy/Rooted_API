@@ -1,11 +1,6 @@
 package com.example.demo.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.ExchangeBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.QueueBuilder;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -28,7 +23,10 @@ public class RabbitConfig {
     public static final String EMAIL_GREETING_ROUTING_KEY = "email.greeting";
 
     public static final String LEAF_STATS_QUEUE = "rooted.leaf.stats";
-    public static final String LEAF_STATS_ROUTING_KEY = "leaf.stats";
+    public static final String LEAF_LIKED_ROUTING_KEY = "leaf.liked";
+    public static final String LEAF_UNLIKED_ROUTING_KEY = "leaf.unliked";
+    public static final String LEAF_STATS_DLQ = "rooted.leaf.stats.dlq";
+    public static final String LEAF_STATS_DLX = "rooted.events.dlx";
 
 
     @Bean
@@ -47,7 +45,7 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue emailGreatingQueue() {
+    public Queue emailGreetingQueue() {
         return QueueBuilder
                 .durable(EMAIL_GREETING_QUEUE)
                 .build();
@@ -73,24 +71,35 @@ public class RabbitConfig {
 
     @Bean
     public Binding emailGreetingBinding(
-            Queue emailGreatingQueue,
+            Queue emailGreetingQueue,
             DirectExchange rootedExchange
     ) {
         return BindingBuilder
-                .bind(emailGreatingQueue)
+                .bind(emailGreetingQueue)
                 .to(rootedExchange)
                 .with(EMAIL_GREETING_ROUTING_KEY);
     }
 
     @Bean
-    public Binding leafStatsBinding(
+    public Binding leafLikedBinding(
             Queue leafStatsQueue,
             DirectExchange rootedExchange
     ) {
         return BindingBuilder
                 .bind(leafStatsQueue)
                 .to(rootedExchange)
-                .with(LEAF_STATS_ROUTING_KEY);
+                .with(LEAF_LIKED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding leafUnlikedBinding(
+            Queue leafStatsQueue,
+            DirectExchange rootedExchange
+    ) {
+        return BindingBuilder
+                .bind(leafStatsQueue)
+                .to(rootedExchange)
+                .with(LEAF_UNLIKED_ROUTING_KEY);
     }
 
     @Bean
