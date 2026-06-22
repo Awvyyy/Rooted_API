@@ -42,8 +42,13 @@ public class OutboxEventService {
             String email,
             String verificationLink
     ) {
-        EmailVerificationMessage message =
-                new EmailVerificationMessage(email, verificationLink);
+        UUID eventId = UUID.randomUUID();
+
+        EmailVerificationMessage message = new EmailVerificationMessage(
+                eventId,
+                email,
+                verificationLink
+        );
 
         saveEvent(
                 EMAIL_VERIFICATION_REQUESTED,
@@ -57,8 +62,13 @@ public class OutboxEventService {
             String email,
             String username
     ) {
-        EmailGreetingMessage message =
-                new EmailGreetingMessage(email, username);
+        UUID eventId = UUID.randomUUID();
+
+        EmailGreetingMessage message = new EmailGreetingMessage(
+                eventId,
+                email,
+                username
+        );
 
         saveEvent(
                 GREETING_EMAIL_REQUESTED,
