@@ -27,7 +27,7 @@ public class BranchController {
         return branchService.createBranch(request, jwt.getSubject());
     }
 
-    @PatchMapping("/{title}/update")
+    @PatchMapping("/update/{title}")
     public BranchResponse updateBranch(
             @PathVariable String title,
             @Valid @RequestBody UpdateBranchDescriptionRequest request,
@@ -40,7 +40,7 @@ public class BranchController {
         );
     }
 
-    @DeleteMapping("/{title}/delete")
+    @DeleteMapping("/delete/{title}")
     public DeleteBranchResponse deleteBranch(
             @PathVariable String title,
             @AuthenticationPrincipal Jwt jwt

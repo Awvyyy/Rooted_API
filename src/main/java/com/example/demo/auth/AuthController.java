@@ -40,7 +40,6 @@ public class AuthController {
     public ResponseEntity<String> verify(
             @RequestParam String token
     ) {
-
         verificationService.verifyEmail(token);
 
         return ResponseEntity.ok("Email verified");

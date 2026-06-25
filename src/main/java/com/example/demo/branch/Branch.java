@@ -125,7 +125,7 @@ public class Branch {
 
 
     public void setPhotoOriginalUrl(String photoOriginalUrl) {
-        this.photoUrl = photoUrl;
+        this.photoUrl = photoOriginalUrl;;
     }
 
     public void setContainsPhoto(boolean containsPhoto) {

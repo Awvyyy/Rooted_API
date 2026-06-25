@@ -24,7 +24,7 @@ public class UserController {
         return userService.getUser(username);
     }
 
-    @PatchMapping("/settings/changePassword")
+    @PatchMapping("changePassword")
     public ChangeUserDataResponse changePassword(
             @Valid @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -32,7 +32,7 @@ public class UserController {
         return userService.changeUserPassword(request, jwt.getSubject());
     }
 
-    @PatchMapping("/settings/changeUsername")
+    @PatchMapping("changeUsername")
     public ChangeUserDataResponse changeUsername(
             @Valid @RequestBody ChangeUsernameRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -40,7 +40,7 @@ public class UserController {
         return userService.changeUsername(request, jwt.getSubject());
     }
 
-    @PatchMapping("/settings/changeEmail")
+    @PatchMapping("changeEmail")
     public ChangeUserDataResponse changeEmail(
             @Valid @RequestBody ChangeEmailRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -48,7 +48,7 @@ public class UserController {
         return userService.changeEmail(request, jwt.getSubject());
     }
 
-    @PatchMapping("/settings/changeProfilePicture")
+    @PatchMapping("changeProfilePicture")
     public ChangeUserDataResponse changeProfilePicture(
             @Valid @RequestBody ChangeProfilePictureRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -56,7 +56,7 @@ public class UserController {
         return userService.changeProfilePicture(request, jwt.getSubject());
     }
 
-    @PatchMapping("/settings/changeCountry")
+    @PatchMapping("changeCountry")
     public ChangeUserDataResponse changeCountry(
             @Valid @RequestBody ChangeCountryRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -64,7 +64,7 @@ public class UserController {
         return userService.changeCountry(request, jwt.getSubject());
     }
 
-    @DeleteMapping("/settings/delete")
+    @DeleteMapping("/delete")
     public DeleteUserResponse deleteUser(
             @Valid @RequestBody DeleteUserRequest request,
             @AuthenticationPrincipal Jwt jwt

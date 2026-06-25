@@ -75,7 +75,7 @@ public class AuthService {
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "wrong email or password"
+                    "Wrong email or password"
             );
 
         }

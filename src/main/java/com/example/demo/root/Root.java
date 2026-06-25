@@ -14,7 +14,7 @@ public class Root {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    private User User;
+    private User user;
 
     @Column(nullable = false)
     private String title;
@@ -31,7 +31,7 @@ public class Root {
         this.title = title;
         this.description = description;
         this.activityRating = 0;
-        this.User = user;
+        this.user = user;
     }
 
     protected Root() {
@@ -56,7 +56,7 @@ public class Root {
     }
 
     public User getUser() {
-        return User;
+        return user;
     }
 
     /* setters */

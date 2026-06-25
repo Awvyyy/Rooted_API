@@ -1,5 +1,6 @@
 package com.example.demo.user;
 
+import com.example.demo.emailVerification.VerificationService;
 import com.example.demo.user.dto.request.*;
 import com.example.demo.user.dto.response.ChangeUserDataResponse;
 import com.example.demo.user.dto.response.DeleteUserResponse;
@@ -17,10 +18,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationService verificationService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, VerificationService verificationService){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.verificationService = verificationService;
     }
 
     @Transactional
@@ -82,6 +85,8 @@ public class UserService {
 
         user.changeEmail(request.newEmail());
         user.setEmailVerified(false);
+        verificationService.sendVerificationEmail(user);
+
         return toResponse(user);
     }
 

@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -38,6 +39,7 @@ class OutboxPublisherTest {
         );
 
         EmailVerificationMessage message = new EmailVerificationMessage(
+                UUID.randomUUID(),
                 "aga@example.com",
                 "http://localhost:8080/auth/verify?token=abc"
         );
@@ -82,6 +84,7 @@ class OutboxPublisherTest {
         );
 
         EmailVerificationMessage message = new EmailVerificationMessage(
+                UUID.randomUUID(),
                 "aga@example.com",
                 "http://localhost:8080/auth/verify?token=abc"
         );

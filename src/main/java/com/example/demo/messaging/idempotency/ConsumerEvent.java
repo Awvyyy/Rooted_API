@@ -69,7 +69,7 @@ public class ConsumerEvent{
 
     public void markAsProcessing(){
         this.status = ConsumerEventStatus.PROCESSING;
-        this.attempts = attempts++;
+        this.attempts++;
         this.lastError = null;
         this.updatedAt = LocalDateTime.now();
     }

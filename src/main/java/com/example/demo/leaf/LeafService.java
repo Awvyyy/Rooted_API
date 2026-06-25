@@ -86,7 +86,6 @@ public class LeafService {
             verifyLeafUnique(request, user, branch);
         }
 
-        leaf.changeBranch(branch);
         leaf.changeCommentary(request.commentary());
 
         return toResponse(leaf);

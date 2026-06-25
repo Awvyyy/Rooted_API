@@ -27,7 +27,7 @@ public class RootController {
         return rootService.createRoot(request, jwt.getSubject());
     }
 
-    @PatchMapping("/{title}/update")
+    @PatchMapping("/update/{title}")
     public RootResponse updateRoot(
             @PathVariable String title,
             @Valid @RequestBody UpdateRootDescriptionRequest request,

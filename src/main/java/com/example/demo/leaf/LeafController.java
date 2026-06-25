@@ -20,7 +20,7 @@ public class LeafController {
         this.leafService = leafService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public LeafResponse createLeaf(
             @Valid @RequestBody CreateLeafRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -45,7 +45,7 @@ public class LeafController {
         return leafService.deleteLeaf(leafId, jwt.getSubject());
     }
 
-    @PostMapping("/{leafId}/like")
+    @PostMapping("/like/{leafId}")
     public ResponseEntity<Void> likeLeaf(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long leafId
@@ -54,7 +54,7 @@ public class LeafController {
         return ResponseEntity.accepted().build();
     }
 
-    @DeleteMapping("/{leafId}/unlike")
+    @DeleteMapping("/unlike/{leafId}")
     public ResponseEntity<Void> unlikeLeaf(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long leafId
