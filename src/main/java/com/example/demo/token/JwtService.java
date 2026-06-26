@@ -30,7 +30,7 @@ public class JwtService {
                 .issuer(jwtProperties.issuer())
                 .issuedAt(currentTime)
                 .expiresAt(currentTime.plus(Duration.ofMinutes(jwtProperties.expirationMinutes())))
-                .subject(user.getEmail())
+                .subject(user.getId().toString())
                 .claim("userId", user.getId())
                 .claim("roles", List.of("User"))
                 .build();

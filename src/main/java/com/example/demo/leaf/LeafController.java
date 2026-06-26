@@ -25,7 +25,7 @@ public class LeafController {
             @Valid @RequestBody CreateLeafRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return leafService.createLeaf(request, jwt.getSubject());
+        return leafService.createLeaf(request, userIdFrom(jwt));
     }
 
     @PatchMapping("/{leafId}")
@@ -34,7 +34,7 @@ public class LeafController {
             @Valid @RequestBody EditLeafRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return leafService.editLeaf(leafId, request, jwt.getSubject());
+        return leafService.editLeaf(leafId, request, userIdFrom(jwt));
     }
 
     @DeleteMapping("/{leafId}")
@@ -42,7 +42,7 @@ public class LeafController {
             @PathVariable Long leafId,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return leafService.deleteLeaf(leafId, jwt.getSubject());
+        return leafService.deleteLeaf(leafId, userIdFrom(jwt));
     }
 
     @PostMapping("/like/{leafId}")
@@ -50,7 +50,7 @@ public class LeafController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long leafId
     ) {
-        leafService.likeLeaf(leafId, jwt.getSubject());
+        leafService.likeLeaf(leafId, userIdFrom(jwt));
         return ResponseEntity.accepted().build();
     }
 
@@ -59,7 +59,11 @@ public class LeafController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long leafId
     ){
-        leafService.unlikeLeaf(leafId, jwt.getSubject());
+        leafService.unlikeLeaf(leafId, userIdFrom(jwt));
         return ResponseEntity.accepted().build();
+    }
+
+    private Long userIdFrom(Jwt jwt) {
+        return Long.valueOf(jwt.getSubject());
     }
 }

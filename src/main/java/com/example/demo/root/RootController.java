@@ -24,7 +24,7 @@ public class RootController {
             @Valid @RequestBody CreateRootRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
-        return rootService.createRoot(request, jwt.getSubject());
+        return rootService.createRoot(request, userIdFrom(jwt));
     }
 
     @PatchMapping("/update/{title}")
@@ -36,7 +36,7 @@ public class RootController {
         return rootService.updateRootDescription(
                 title,
                 request,
-                jwt.getSubject()
+                userIdFrom(jwt)
         );
     }
 
@@ -55,6 +55,10 @@ public class RootController {
             @PathVariable String title,
             @AuthenticationPrincipal Jwt jwt
     ){
-        return rootService.deleteRoot(title, jwt.getSubject());
+        return rootService.deleteRoot(title, userIdFrom(jwt));
+    }
+
+    private Long userIdFrom(Jwt jwt) {
+        return Long.valueOf(jwt.getSubject());
     }
 }

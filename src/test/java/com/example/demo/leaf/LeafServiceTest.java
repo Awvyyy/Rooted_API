@@ -55,7 +55,7 @@ class LeafServiceTest {
         Branch branch = branch(10L, user);
         CreateLeafRequest request = new CreateLeafRequest(10L, "Nice post");
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(branchRepository.findBranchById(anyLong())).thenReturn(Optional.of(branch));
         when(leafRepository.existsByCommentaryAndUserAndBranch(
                 request.commentary(),
@@ -63,7 +63,7 @@ class LeafServiceTest {
                 branch
         )).thenReturn(false);
 
-        LeafResponse response = leafService.createLeaf(request, "aga@example.com");
+        LeafResponse response = leafService.createLeaf(request, 1L);
 
         assertThat(response.authorName()).isEqualTo("aga");
         assertThat(response.branchName()).isEqualTo("Branch title");
@@ -83,9 +83,9 @@ class LeafServiceTest {
 
         CreateLeafRequest request = new CreateLeafRequest(10L, "Nice post");
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
 
-        assertThatThrownBy(() -> leafService.createLeaf(request, "aga@example.com"))
+        assertThatThrownBy(() -> leafService.createLeaf(request, 1L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("403 FORBIDDEN");
 
@@ -99,7 +99,7 @@ class LeafServiceTest {
         Branch branch = branch(10L, user);
         CreateLeafRequest request = new CreateLeafRequest(10L, "Nice post");
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(branchRepository.findBranchById(anyLong())).thenReturn(Optional.of(branch));
         when(leafRepository.existsByCommentaryAndUserAndBranch(
                 request.commentary(),
@@ -107,7 +107,7 @@ class LeafServiceTest {
                 branch
         )).thenReturn(true);
 
-        assertThatThrownBy(() -> leafService.createLeaf(request, "aga@example.com"))
+        assertThatThrownBy(() -> leafService.createLeaf(request, 1L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("409 CONFLICT");
 
@@ -126,7 +126,7 @@ class LeafServiceTest {
 
         EditLeafRequest request = new EditLeafRequest(10L, "New text");
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(leafRepository.findById(100L)).thenReturn(Optional.of(leaf));
         when(branchRepository.findBranchById(anyLong())).thenReturn(Optional.of(branch));
         when(leafRepository.existsByCommentaryAndUserAndBranch(
@@ -135,7 +135,7 @@ class LeafServiceTest {
                 branch
         )).thenReturn(false);
 
-        LeafResponse response = leafService.editLeaf(100L, request, "aga@example.com");
+        LeafResponse response = leafService.editLeaf(100L, request, 1L);
 
         assertThat(leaf.getCommentary()).isEqualTo("New text");
         assertThat(response.commentary()).isEqualTo("New text");
@@ -153,10 +153,10 @@ class LeafServiceTest {
 
         EditLeafRequest request = new EditLeafRequest(10L, "New text");
 
-        when(userService.validateUser("another@example.com")).thenReturn(anotherUser);
+        when(userService.validateUserById(2L)).thenReturn(anotherUser);
         when(leafRepository.findById(100L)).thenReturn(Optional.of(leaf));
 
-        assertThatThrownBy(() -> leafService.editLeaf(100L, request, "another@example.com"))
+        assertThatThrownBy(() -> leafService.editLeaf(100L, request, 2L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("403 FORBIDDEN");
 
@@ -171,10 +171,10 @@ class LeafServiceTest {
         Leaf leaf = new Leaf(branch, user, "Nice post", 0);
         ReflectionTestUtils.setField(leaf, "id", 100L);
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(leafRepository.findById(100L)).thenReturn(Optional.of(leaf));
 
-        leafService.likeLeaf(100L, "aga@example.com");
+        leafService.likeLeaf(100L, 1L);
 
         verify(leafLikeRepository).saveAndFlush(any(LeafLike.class));
         verify(outboxEventService).saveLeafLikedEvent(100L, 10L, 1L);
@@ -188,14 +188,14 @@ class LeafServiceTest {
         Leaf leaf = new Leaf(branch, user, "Nice post", 0);
         ReflectionTestUtils.setField(leaf, "id", 100L);
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(leafRepository.findById(100L)).thenReturn(Optional.of(leaf));
 
         doThrow(new DataIntegrityViolationException("duplicate like"))
                 .when(leafLikeRepository)
                 .saveAndFlush(any(LeafLike.class));
 
-        assertThatThrownBy(() -> leafService.likeLeaf(100L, "aga@example.com"))
+        assertThatThrownBy(() -> leafService.likeLeaf(100L, 1L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("409 CONFLICT");
 
@@ -213,12 +213,12 @@ class LeafServiceTest {
 
         LeafLike leafLike = new LeafLike(leaf, user);
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(leafRepository.findById(100L)).thenReturn(Optional.of(leaf));
         when(leafLikeRepository.findByLeaf_IdAndUser_Id(100L, 1L))
                 .thenReturn(Optional.of(leafLike));
 
-        leafService.unlikeLeaf(100L, "aga@example.com");
+        leafService.unlikeLeaf(100L, 1L);
 
         verify(leafLikeRepository).delete(leafLike);
         verify(outboxEventService).saveLeafUnlikedEvent(100L, 10L, 1L);
@@ -232,12 +232,12 @@ class LeafServiceTest {
         Leaf leaf = new Leaf(branch, user, "Nice post", 0);
         ReflectionTestUtils.setField(leaf, "id", 100L);
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(leafRepository.findById(100L)).thenReturn(Optional.of(leaf));
         when(leafLikeRepository.findByLeaf_IdAndUser_Id(100L, 1L))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> leafService.unlikeLeaf(100L, "aga@example.com"))
+        assertThatThrownBy(() -> leafService.unlikeLeaf(100L, 1L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("409 CONFLICT");
 
@@ -256,10 +256,10 @@ class LeafServiceTest {
         Leaf leaf = new Leaf(branch, user, "Nice post", 3);
         ReflectionTestUtils.setField(leaf, "id", 100L);
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(leafRepository.findById(100L)).thenReturn(Optional.of(leaf));
 
-        DeleteLeafResponse response = leafService.deleteLeaf(100L, "aga@example.com");
+        DeleteLeafResponse response = leafService.deleteLeaf(100L, 1L);
 
         assertThat(response.message())
                 .isEqualTo("Leaf: Nice post deleted successfully");
@@ -281,10 +281,10 @@ class LeafServiceTest {
         Leaf leaf = new Leaf(branch, owner, "Nice post", 0);
         ReflectionTestUtils.setField(leaf, "id", 100L);
 
-        when(userService.validateUser("another@example.com")).thenReturn(anotherUser);
+        when(userService.validateUserById(2L)).thenReturn(anotherUser);
         when(leafRepository.findById(100L)).thenReturn(Optional.of(leaf));
 
-        assertThatThrownBy(() -> leafService.deleteLeaf(100L, "another@example.com"))
+        assertThatThrownBy(() -> leafService.deleteLeaf(100L, 2L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("403 FORBIDDEN");
 

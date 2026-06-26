@@ -27,8 +27,8 @@ public class UserService {
     }
 
     @Transactional
-    public ChangeUserDataResponse changeUserPassword (ChangePasswordRequest request, String email) {
-        User user = validateUser(email);
+    public ChangeUserDataResponse changeUserPassword (ChangePasswordRequest request, Long userId) {
+        User user = validateUserById(userId);
 
         if (!passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
             throw new ResponseStatusException(
@@ -50,9 +50,9 @@ public class UserService {
     }
 
     @Transactional
-    public ChangeUserDataResponse changeUsername(ChangeUsernameRequest request, String email){
+    public ChangeUserDataResponse changeUsername(ChangeUsernameRequest request, Long userId){
 
-        User user = validateUser(email);
+        User user = validateUserById(userId);
 
         if (userRepository.existsByUsername(request.newUsername())) {
             throw new ResponseStatusException(
@@ -66,8 +66,8 @@ public class UserService {
     }
 
     @Transactional
-    public ChangeUserDataResponse changeEmail(ChangeEmailRequest request, String email) {
-        User user = validateUser(email);
+    public ChangeUserDataResponse changeEmail(ChangeEmailRequest request, Long userId) {
+        User user = validateUserById(userId);
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new ResponseStatusException(
@@ -91,9 +91,9 @@ public class UserService {
     }
 
     @Transactional
-    public ChangeUserDataResponse changeProfilePicture(ChangeProfilePictureRequest request, String email){
+    public ChangeUserDataResponse changeProfilePicture(ChangeProfilePictureRequest request, Long userId){
 
-        User user = validateUser(email);
+        User user = validateUserById(userId);
 
         if (Objects.equals(user.getProfilePictureUrl(), request.profilePictureUrl())){
             throw new ResponseStatusException(
@@ -109,9 +109,9 @@ public class UserService {
     }
 
     @Transactional
-    public ChangeUserDataResponse changeCountry(ChangeCountryRequest request, String email){
+    public ChangeUserDataResponse changeCountry(ChangeCountryRequest request, Long userId){
 
-        User user = validateUser(email);
+        User user = validateUserById(userId);
 
         if (user.getCountryCode().equals(request.newCountryCode())){
             throw new ResponseStatusException(
@@ -143,12 +143,8 @@ public class UserService {
     }
 
     @Transactional
-    public DeleteUserResponse deleteUser (DeleteUserRequest request, String email){
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "User not found"
-                ));
+    public DeleteUserResponse deleteUser (DeleteUserRequest request, Long userId){
+        User user = validateUserById(userId);
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())){
             throw new ResponseStatusException(
@@ -168,7 +164,7 @@ public class UserService {
 //    @Transactional
 //    public ChangeUserDataResponse incrementUserCommends(){
 //
-//        User user = validateUser(email);
+//        User user = validateUserById(userId);
 //        user.setCommends(user.getCommends() + 1);
 //        return toResponse(user);
 //
@@ -177,7 +173,7 @@ public class UserService {
 //    @Transactional
 //    public ChangeUserDataResponse incrementUserMessages(){
 //
-//        User user = validateUser(email);
+//        User user = validateUserById(userId);
 //        user.setMessages(user.getMessages() + 1);
 //        return toResponse(user);
 //    }
@@ -192,14 +188,6 @@ public class UserService {
                 user.getCommends(),
                 user.getMessages()
         );
-    }
-
-    public User validateUser(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "User not found"
-                ));
     }
 
     public User validateUserById(Long userId) {

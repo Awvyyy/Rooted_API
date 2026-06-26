@@ -27,8 +27,8 @@ public class RootService {
     }
 
     @Transactional
-    public RootResponse createRoot(CreateRootRequest request, String email) {
-        User user = userService.validateUser(email);
+    public RootResponse createRoot(CreateRootRequest request, Long userId) {
+        User user = userService.validateUserById(userId);
 
         if (!user.isEmailVerified()) {
             throw new ResponseStatusException(
@@ -60,9 +60,9 @@ public class RootService {
     public RootResponse updateRootDescription(
             String title,
             UpdateRootDescriptionRequest request,
-            String email
+            Long userId
     ) {
-        Root root = validateRootOwnership(title, email);
+        Root root = validateRootOwnership(title, userId);
 
         root.changeDescription(request.newDescription());
 
@@ -70,8 +70,8 @@ public class RootService {
     }
 
     @Transactional
-    public DeleteRootResponse deleteRoot(String title, String email){
-        Root root = validateRootOwnership(title, email);
+    public DeleteRootResponse deleteRoot(String title, Long userId){
+        Root root = validateRootOwnership(title, userId);
         rootRepository.delete(root);
 
         return new DeleteRootResponse(
@@ -99,8 +99,8 @@ public class RootService {
         return toResponse(root);
     }
 
-    private Root validateRootOwnership(String title, String email) {
-        User user = userService.validateUser(email);
+    private Root validateRootOwnership(String title, Long userId) {
+        User user = userService.validateUserById(userId);
 
         Root root = rootRepository.findByTitle(title)
                 .orElseThrow(() -> new ResponseStatusException(

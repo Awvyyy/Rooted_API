@@ -36,10 +36,10 @@ class RootServiceTest {
         User user = verifiedUser(1L);
         CreateRootRequest request = new CreateRootRequest("Java", "Java discussion");
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(rootRepository.existsByTitle("Java")).thenReturn(false);
 
-        RootResponse response = rootService.createRoot(request, "aga@example.com");
+        RootResponse response = rootService.createRoot(request, 1L);
 
         assertThat(response.title()).isEqualTo("Java");
         assertThat(response.description()).isEqualTo("Java discussion");
@@ -52,9 +52,9 @@ class RootServiceTest {
         User user = new User("aga", "hash", "aga@example.com", "EE");
         CreateRootRequest request = new CreateRootRequest("Java", "Java discussion");
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
 
-        assertThatThrownBy(() -> rootService.createRoot(request, "aga@example.com"))
+        assertThatThrownBy(() -> rootService.createRoot(request, 1L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("403 FORBIDDEN");
 
@@ -66,10 +66,10 @@ class RootServiceTest {
         User user = verifiedUser(1L);
         CreateRootRequest request = new CreateRootRequest("Java", "Java discussion");
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(rootRepository.existsByTitle("Java")).thenReturn(true);
 
-        assertThatThrownBy(() -> rootService.createRoot(request, "aga@example.com"))
+        assertThatThrownBy(() -> rootService.createRoot(request, 1L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("409 CONFLICT");
 
@@ -82,10 +82,10 @@ class RootServiceTest {
         Root root = new Root("Java", "Old description", 0, user);
         UpdateRootDescriptionRequest request = new UpdateRootDescriptionRequest("New description");
 
-        when(userService.validateUser("aga@example.com")).thenReturn(user);
+        when(userService.validateUserById(1L)).thenReturn(user);
         when(rootRepository.findByTitle("Java")).thenReturn(Optional.of(root));
 
-        RootResponse response = rootService.updateRootDescription("Java", request, "aga@example.com");
+        RootResponse response = rootService.updateRootDescription("Java", request, 1L);
 
         assertThat(root.getDescription()).isEqualTo("New description");
         assertThat(response.description()).isEqualTo("New description");
@@ -98,10 +98,10 @@ class RootServiceTest {
         Root root = new Root("Java", "Old description", 0, owner);
         UpdateRootDescriptionRequest request = new UpdateRootDescriptionRequest("New description");
 
-        when(userService.validateUser("another@example.com")).thenReturn(anotherUser);
+        when(userService.validateUserById(2L)).thenReturn(anotherUser);
         when(rootRepository.findByTitle("Java")).thenReturn(Optional.of(root));
 
-        assertThatThrownBy(() -> rootService.updateRootDescription("Java", request, "another@example.com"))
+        assertThatThrownBy(() -> rootService.updateRootDescription("Java", request, 2L))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("403 FORBIDDEN");
     }

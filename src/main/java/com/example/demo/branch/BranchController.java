@@ -24,7 +24,7 @@ public class BranchController {
             @Valid @RequestBody CreateBranchRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
-        return branchService.createBranch(request, jwt.getSubject());
+        return branchService.createBranch(request, userIdFrom(jwt));
     }
 
     @PatchMapping("/update/{title}")
@@ -35,7 +35,7 @@ public class BranchController {
     ){
         return branchService.updateBranch(
                 request,
-                jwt.getSubject(),
+                userIdFrom(jwt),
                 title
         );
     }
@@ -45,6 +45,10 @@ public class BranchController {
             @PathVariable String title,
             @AuthenticationPrincipal Jwt jwt
     ){
-        return branchService.deleteBranch(title, jwt.getSubject());
+        return branchService.deleteBranch(title, userIdFrom(jwt));
+    }
+
+    private Long userIdFrom(Jwt jwt) {
+        return Long.valueOf(jwt.getSubject());
     }
 }

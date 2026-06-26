@@ -46,9 +46,9 @@ public class LeafService {
     @Transactional
     public LeafResponse createLeaf(
             CreateLeafRequest request,
-            String email
+            Long userId
     ) {
-        User user = getVerifiedUser(email);
+        User user = getVerifiedUser(userId);
         Branch branch = branchRepository.findBranchById(request.branchId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found"));
 
@@ -71,9 +71,9 @@ public class LeafService {
     public LeafResponse editLeaf(
             Long leafId,
             EditLeafRequest request,
-            String email
+            Long userId
     ) {
-        User user = getVerifiedUser(email);
+        User user = getVerifiedUser(userId);
         Leaf leaf = getOwnedLeaf(leafId, user);
         Branch branch = branchRepository.findBranchById(request.branchId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found"));
@@ -92,8 +92,8 @@ public class LeafService {
     }
 
     @Transactional
-    public void likeLeaf(Long leafId, String email) {
-        User user = getVerifiedUser(email);
+    public void likeLeaf(Long leafId, Long userId) {
+        User user = getVerifiedUser(userId);
 
         Leaf leaf = leafRepository.findById(leafId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -119,8 +119,8 @@ public class LeafService {
     }
 
     @Transactional
-    public void unlikeLeaf(Long leafId, String email) {
-        User user = getVerifiedUser(email);
+    public void unlikeLeaf(Long leafId, Long userId) {
+        User user = getVerifiedUser(userId);
 
         Leaf leaf = leafRepository.findById(leafId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -148,9 +148,9 @@ public class LeafService {
     @Transactional
     public DeleteLeafResponse deleteLeaf(
             Long leafId,
-            String email
+            Long userId
     ) {
-        User user = getVerifiedUser(email);
+        User user = getVerifiedUser(userId);
         Leaf leaf = getOwnedLeaf(leafId, user);
 
         String commentary = leaf.getCommentary();
@@ -182,8 +182,8 @@ public class LeafService {
         return leaf;
     }
 
-    private User getVerifiedUser(String email) {
-        User user = userService.validateUser(email);
+    private User getVerifiedUser(Long userId) {
+        User user = userService.validateUserById(userId);
 
         if (!user.isEmailVerified()) {
             throw new ResponseStatusException(

@@ -29,7 +29,7 @@ public class UserController {
             @Valid @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return userService.changeUserPassword(request, jwt.getSubject());
+        return userService.changeUserPassword(request, userIdFrom(jwt));
     }
 
     @PatchMapping("changeUsername")
@@ -37,7 +37,7 @@ public class UserController {
             @Valid @RequestBody ChangeUsernameRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return userService.changeUsername(request, jwt.getSubject());
+        return userService.changeUsername(request, userIdFrom(jwt));
     }
 
     @PatchMapping("changeEmail")
@@ -45,7 +45,7 @@ public class UserController {
             @Valid @RequestBody ChangeEmailRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return userService.changeEmail(request, jwt.getSubject());
+        return userService.changeEmail(request, userIdFrom(jwt));
     }
 
     @PatchMapping("changeProfilePicture")
@@ -53,7 +53,7 @@ public class UserController {
             @Valid @RequestBody ChangeProfilePictureRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return userService.changeProfilePicture(request, jwt.getSubject());
+        return userService.changeProfilePicture(request, userIdFrom(jwt));
     }
 
     @PatchMapping("changeCountry")
@@ -61,7 +61,7 @@ public class UserController {
             @Valid @RequestBody ChangeCountryRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return userService.changeCountry(request, jwt.getSubject());
+        return userService.changeCountry(request, userIdFrom(jwt));
     }
 
     @DeleteMapping("/delete")
@@ -69,9 +69,13 @@ public class UserController {
             @Valid @RequestBody DeleteUserRequest request,
             @AuthenticationPrincipal Jwt jwt
     ){
-        return userService.deleteUser(request, jwt.getSubject());
+        return userService.deleteUser(request, userIdFrom(jwt));
     }
 
     /// todo email verification
+
+    private Long userIdFrom(Jwt jwt) {
+        return Long.valueOf(jwt.getSubject());
+    }
 
 }

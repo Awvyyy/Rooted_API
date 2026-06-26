@@ -34,8 +34,8 @@ public class BranchService {
     }
 
     @Transactional
-    public BranchResponse createBranch(CreateBranchRequest request, String email) {
-        User user = getVerifiedUser(email);
+    public BranchResponse createBranch(CreateBranchRequest request, Long userId) {
+        User user = getVerifiedUser(userId);
         Root root = getRootByTitle(request.rootTitle());
 
         checkBranchDuplicate(request.title(), request.description());
@@ -62,10 +62,10 @@ public class BranchService {
     @Transactional
     public BranchResponse updateBranch(
             UpdateBranchDescriptionRequest request,
-            String email,
+            Long userId,
             String title
     ) {
-        User user = userService.validateUser(email);
+        User user = userService.validateUserById(userId);
         Branch branch = getBranchByTitle(title);
 
         checkBranchOwner(branch, user);
@@ -87,8 +87,8 @@ public class BranchService {
     }
 
     @Transactional
-    public DeleteBranchResponse deleteBranch(String title, String email) {
-        User user = userService.validateUser(email);
+    public DeleteBranchResponse deleteBranch(String title, Long userId) {
+        User user = userService.validateUserById(userId);
 
         Branch branch = getBranchByTitle(title);
 
@@ -101,8 +101,8 @@ public class BranchService {
         );
     }
 
-    private User getVerifiedUser(String email) {
-        User user = userService.validateUser(email);
+    private User getVerifiedUser(Long userId) {
+        User user = userService.validateUserById(userId);
 
         if (!user.isEmailVerified()) {
             throw new ResponseStatusException(
